@@ -70,7 +70,7 @@ public class SudokuThread extends Thread{
 				} while(!canStop);
 				//Program.print(table);
 				try {
-					if(Program.sleep) sleep(50);
+					if(Program.sleep) sleep(10);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}

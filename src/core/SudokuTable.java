@@ -33,8 +33,12 @@ public class SudokuTable implements Comparable<Object>{
 		for(int x=0; x<content.getSize(); x++)
 			if(val == content.get(row, x+1).value) return false;
 		
+		//String output = String.format("Row %d passed validation with value %d.\n", row, val);
+		
 		for(int y=0; y<content.getSize(); y++)
 			if(val == content.get(y+1, col).value) return false;
+		
+		//output += String.format("Column %d passed validation with value %d.\n", col, val);
 
 		int 
 			initX = (((col-1)/3) * 3) + 1, 
@@ -52,12 +56,15 @@ public class SudokuTable implements Comparable<Object>{
 					return false;
 			}
 		}
-			
+		//output += String.format("Square [%d,%d]:[%d,%d] passed validation with value %d\n", initY, initX, initY+2, initX+2, val);
+		//Program.print(output);	
 		return true;
 	}
 	
-	public void commenceAnalysis()
+	public void commenceAnalysis() { commenceAnalysis(true); }
+	public void commenceAnalysis(boolean isOriginalTable)
 	{
+		if(!validate()) return;
 		Program.print("Initiating analysis for the table below:\n%s\n", this.toTableString());
 		this.startingTime = new Date();
 		analyzeSelf();
@@ -74,6 +81,7 @@ public class SudokuTable implements Comparable<Object>{
 			Program.print("Analysis took %.3f seconds in total.", (float)(new Date().getTime() - startingTime.getTime())/1000f);
 
 			if(Program.referenceWindow) Program.window.notifyAboutFinalization();
+			Program.print("The result table has %s the validation.", validate()?"passed":"failed");
 		}
 	}
 	
@@ -103,8 +111,7 @@ public class SudokuTable implements Comparable<Object>{
 	
 	private boolean foundAndAppliedObviousMoves()
 	{	
-		int counter = 0;
-		
+		//boolean foundOne = false;
 		for(int y = 1; y <= size; y++)
 		{
 			for(int x = 1; x <= size; x++)
@@ -117,14 +124,14 @@ public class SudokuTable implements Comparable<Object>{
 					progressMap.setTarget(y, x, possibleValues);
 					set(y, x, chosenValue);
 					progressMap.moveDown(chosenValue);
-					counter++;
+					//foundOne = true;
+					return true;
 				}
 			}
 		}
 		
-		if(Program.verbose && counter>0) Program.print("%d obvious moves.",counter);
-		
-		return counter!=0;
+		//return foundOne;
+		return false;
 	}
 	
 	private boolean foundNonobviousMovesAndDecidedOnBestOne()
@@ -282,6 +289,50 @@ public class SudokuTable implements Comparable<Object>{
 		else {
 			return o.hashCode() - this.hashCode();
 		}
+	}
+	
+	public boolean validate()
+	{
+		for(int row = 1; row<size; row++) {
+			for(int col = 1; col<size; col++) {
+				int val = get(row,col).value;
+				if(val == 0) continue;
+				for(int x=0; x<content.getSize(); x++) {
+					if(val == content.get(row, x+1).value && x+1!=col) {
+						Program.print("Validation failed for row falidation of cell %d,%d - conflict with cell %d,%d.", row, col, row, x+1);
+						return false;
+					}
+				}
+				
+				for(int y=0; y<content.getSize(); y++) {
+					if(val == content.get(y+1, col).value && y+1!=row) {
+						Program.print("Validation failed for column falidation of cell %d,%d - conflict with cell %d,%d.", row, col, y+1, col);
+						return false;
+					}
+				}
+				
+	
+				int 
+					initX = (((col-1)/3) * 3) + 1, 
+					initY = (((row-1)/3) * 3) + 1,
+					
+					value;
+				
+				for(int y = 0; y<3; y++)
+				{
+					for(int x = 0; x<3; x++)
+					{
+						if(initY+y == row && initX+x == col) continue;
+						value = content.get(initY+y, initX+x).value;
+						if(val == value) {
+							Program.print("Validation failed for square of cell %d,%d - conflict with cell %d,%d.", row, col, initY+y, initX+x);
+							return false;
+						}
+					}
+				}
+			}
+		}
+		return true;
 	}
 	
 }
