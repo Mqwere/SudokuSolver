@@ -1,6 +1,8 @@
-package core;
+package main.core;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 public class SquareSudokuMatrix 
 {
@@ -102,6 +104,25 @@ public class SquareSudokuMatrix
 			if(ssm.content.equals(this.content)) return true;
 		}
 		return false;
+	}
+
+	public void forEachElement(Consumer<? super SudokuField> action)
+	{
+		this.content
+			.stream()
+			.forEachOrdered
+			(
+				(subcontent) ->
+				{
+					subcontent.stream()
+					.forEachOrdered(action);
+				}
+			);
+	}
+	
+	public Stream<SudokuField> stream()
+	{
+		return content.stream().flatMap(ArrayList::stream);
 	}
 }
 

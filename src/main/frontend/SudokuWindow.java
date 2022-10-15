@@ -1,4 +1,4 @@
-package frontend;
+package main.frontend;
 
 import java.util.ArrayList;
 
@@ -7,9 +7,9 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import java.awt.Font;
+import main.core.SudokuTable;
 
-import core.SudokuTable;
+import java.awt.Font;
 
 public class SudokuWindow extends JFrame{
 	private static final long serialVersionUID = 1L;

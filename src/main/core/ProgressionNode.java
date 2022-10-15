@@ -1,4 +1,4 @@
-package core;
+package main.core;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -69,6 +69,7 @@ public class ProgressionNode {
 	
 	public SudokuFieldLite getFieldChangedByThisNode()
 	{
+		if(parent == null) throw new UnableToSolveException("SudokuSolver could not solve this table.");
 		return new SudokuFieldLite(parent.row, parent.col, this.parentPossibleValueChosen);
 	}
 	

@@ -1,10 +1,11 @@
-package threads;
+package main.threads;
 
 import java.util.ArrayList;
 
-import core.Program;
-import core.SudokuField;
-import core.SudokuTable;
+import main.core.SudokuField;
+import main.core.SudokuSolver;
+import main.core.SudokuTable;
+import main.core.UnableToSolveException;
 
 public class SudokuThread extends Thread{
 	private Executable exec;
@@ -29,7 +30,7 @@ public class SudokuThread extends Thread{
 			() -> {
 				SudokuField field = table.get(row, col);
 				if(field.value!=0) return;
-				for(int i=1; i<10; i++)
+				for(int i=1; i<=table.size; i++)
 				{
 					if(table.isValidMove(row, col, i)) field.addPossibleValue(i);
 				}
@@ -43,8 +44,6 @@ public class SudokuThread extends Thread{
 		return new SudokuThread
 		(
 			() -> {
-				//Program.print(table.toTableString() + "\n\n");
-				
 				ArrayList<SudokuThread> threads = new ArrayList<>();
 				SudokuThread thread;
 				for(int y = 1; y <= table.size; y++)
@@ -70,7 +69,8 @@ public class SudokuThread extends Thread{
 				} while(!canStop);
 				//Program.print(table);
 				try {
-					if(Program.sleep) sleep(10);
+					if(SudokuSolver.sleep) sleep(10);
+					else sleep(1);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -80,21 +80,26 @@ public class SudokuThread extends Thread{
 		);
 	}
 	
-    public void run()
-    {
-        try 
-        {
-        	hasFinished = false;
+	public void run()
+	{
+		try 
+		{
+			hasFinished = false;
 			exec.execute();
 		}
-        catch (Exception e) 
-        {
-			Program.print("%s has encountered an error:\n", this.getName());
-            e.printStackTrace();
-            wasSuccesful = false;
+		catch (UnableToSolveException e)
+		{
+			SudokuSolver.println(e);
 		}
-        finally {
+		catch (Exception e) 
+		{
+			SudokuSolver.println("%s has encountered an error:\n", this.getName());
+			e.printStackTrace();
+			wasSuccesful = false;
+		}
+		finally 
+		{			
 			hasFinished = true;
-        }
-    }
+		}
+	}
 }

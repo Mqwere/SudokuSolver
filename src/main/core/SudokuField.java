@@ -1,6 +1,8 @@
-package core;
+package main.core;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 public class SudokuField {
 	public int value, numberOfPossibleValues = 0;
@@ -11,7 +13,40 @@ public class SudokuField {
 		this.value = value;
 	}
 	
-	public void addPossibleValue(int value) { this.possibleValues.add(value); numberOfPossibleValues++; }
+	public void addPossibleValue(int value) 
+	{ 
+		this.possibleValues.add(value); 
+		numberOfPossibleValues++; 
+	}
+	
+	public void addPossibleValues(Collection<Integer> values) 
+	{ 
+		this.possibleValues.addAll(values);
+		numberOfPossibleValues += values.size(); 
+	}
+	
+	public void removePossibleValue(int value)
+	{
+		if(possibleValues.contains(value))
+		{
+			possibleValues = new ArrayList<>
+			(
+				possibleValues
+					.stream()
+					.filter
+					(
+						(Integer num) -> 
+							{
+								return num != value;
+							}
+					)
+					.collect(Collectors.toList())
+			);
+			
+			numberOfPossibleValues--; 
+		}
+	}
+	
 	public ArrayList<Integer> getPossibleValues() { return this.possibleValues; }
 	
 	@Override

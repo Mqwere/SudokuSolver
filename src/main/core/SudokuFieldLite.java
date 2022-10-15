@@ -1,4 +1,4 @@
-package core;
+package main.core;
 
 public class SudokuFieldLite {
 	public int row, col, val;
