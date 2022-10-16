@@ -11,23 +11,6 @@ import main.core.SudokuTable;
 
 public class SudokuTableTest
 {
-	//003000200060980043490031006907000860040098000005407109600003905508100072209056038
-	/*
-	0 0 3		0 0 0		2 0 0 
-	0 6 0		9 8 0		0 4 3 
-	4 9 0		0 3 1		0 0 6 
-	
-	9 0 7		0 0 0		8 6 0 
-	0 4 0		0 9 8		0 0 0 
-	0 0 5		4 0 7		1 0 9 
-	
-	6 0 0		0 0 3		9 0 5 
-	5 0 8		1 0 0		0 7 2 
-	2 0 9		0 5 6		0 3 8
-	 */
-	
-	//534678912672195348198342567859761423426000791713924856961537284287419635345286179
-	
 	private SquareSudokuMatrix getTestMatrix(int size, String values)
 	{
 		return new SquareSudokuMatrix(size, values);
@@ -65,6 +48,21 @@ public class SudokuTableTest
 		}
 		
 	}
+	
+	/*
+	 Matrix used below:
+	 	0 4 6	3 0 0 	0 7 9
+	 	7 0 3 	0 0 6 	4 0 0
+	 	0 0 5 	0 0 0 	0 3 6
+	 
+	 	0 5 0  	0 0 1   6 0 3
+	 	3 7 0  	5 6 4   9 0 0
+	 	0 6 9  	8 2 3   0 0 7
+	 
+	 	0 0 0	0 6 3   7 0 0
+	 	0 0 0 	0 0 7 	3 6 8
+	 	6 3 7 	0 1 8 	0 9 0 
+	 */
 	
 	@Test
 	public void tableAnalysisReturnsValidOutputForSomewhatLessCompleteSudoku()
@@ -108,9 +106,9 @@ public class SudokuTableTest
 		expectedMatrix.get(7,1).addPossibleValues(Arrays.asList(1,2,4,5,8,9));
 		expectedMatrix.get(7,2).addPossibleValues(Arrays.asList(1,2,8,9));
 		expectedMatrix.get(7,3).addPossibleValues(Arrays.asList(1,2,4,8));
-		expectedMatrix.get(7,6).addPossibleValues(Arrays.asList(2,5,9));
-		expectedMatrix.get(7,8).addPossibleValues(Arrays.asList(1,2));
-		expectedMatrix.get(7,9).addPossibleValues(Arrays.asList(1,2,4));
+		expectedMatrix.get(7,4).addPossibleValues(Arrays.asList(2,4,9));
+		expectedMatrix.get(7,8).addPossibleValues(Arrays.asList(1,2,4,5));
+		expectedMatrix.get(7,9).addPossibleValues(Arrays.asList(1,2,4,5));
 		
 		expectedMatrix.get(8,1).addPossibleValues(Arrays.asList(1,2,4,5,9));
 		expectedMatrix.get(8,2).addPossibleValues(Arrays.asList(1,2,9));
