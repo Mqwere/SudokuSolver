@@ -1,6 +1,10 @@
 package test.core;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import main.core.SquareSudokuMatrix;
 import main.core.SudokuTable;
@@ -8,41 +12,150 @@ import main.core.SudokuTable;
 public class SudokuTableTest
 {
 	//003000200060980043490031006907000860040098000005407109600003905508100072209056038
+	/*
+	0 0 3		0 0 0		2 0 0 
+	0 6 0		9 8 0		0 4 3 
+	4 9 0		0 3 1		0 0 6 
 	
-	private SquareSudokuMatrix getTestMatrix()
+	9 0 7		0 0 0		8 6 0 
+	0 4 0		0 9 8		0 0 0 
+	0 0 5		4 0 7		1 0 9 
+	
+	6 0 0		0 0 3		9 0 5 
+	5 0 8		1 0 0		0 7 2 
+	2 0 9		0 5 6		0 3 8
+	 */
+	
+	//534678912672195348198342567859761423426000791713924856961537284287419635345286179
+	
+	private SquareSudokuMatrix getTestMatrix(int size, String values)
 	{
-		return new SquareSudokuMatrix(3,"003000200060980043490031006907000860040098000005407109600003905508100072209056038");
+		return new SquareSudokuMatrix(size, values);
 	}
 	
-	private SudokuTable getTestTable()
+	@Test
+	public void tableAnalysisReturnsValidOutputForNearCompleteSudoku()
 	{
-		SquareSudokuMatrix subOutput = getTestMatrix();
+		int matrixSize = 9;
+		String matrixValues = "534678912672195348198342567859761423426000791713924856961537284287419635345286179";
 		
-		subOutput.get(1, 1).addPossibleValues(Arrays.asList(1, 7, 8));
-		subOutput.get(1, 2).addPossibleValues(Arrays.asList(1, 5, 7, 8));
-		subOutput.get(1, 4).addPossibleValues(Arrays.asList(5, 6, 7));
-		subOutput.get(1, 5).addPossibleValues(Arrays.asList(4, 6, 7));
-		subOutput.get(1, 6).addPossibleValues(Arrays.asList(4, 5));
-		subOutput.get(1, 8).addPossibleValues(Arrays.asList(1, 5, 8, 9));
-		subOutput.get(1, 9).addPossibleValues(Arrays.asList(1, 7, 9));
-
-		subOutput.get(2, 1).addPossibleValues(Arrays.asList(1, 7));
-		subOutput.get(2, 3).addPossibleValues(Arrays.asList(1, 2));
-		subOutput.get(2, 6).addPossibleValues(Arrays.asList(2, 5));
-		subOutput.get(2, 7).addPossibleValues(Arrays.asList(5, 7));
+		SquareSudokuMatrix expectedMatrix = getTestMatrix(matrixSize, matrixValues);
+		expectedMatrix.get(5, 4).addPossibleValue(8);
+		expectedMatrix.get(5, 5).addPossibleValue(5);
+		expectedMatrix.get(5, 6).addPossibleValue(3);
 		
-		subOutput.get(3, 3).addPossibleValues(Arrays.asList(2));
-		subOutput.get(3, 4).addPossibleValues(Arrays.asList(2, 5, 7));
-		subOutput.get(3, 7).addPossibleValues(Arrays.asList(5, 7));
-		subOutput.get(3, 8).addPossibleValues(Arrays.asList(2, 5, 8));
+		SudokuTable expectedTable =  new SudokuTable(expectedMatrix);
+		SudokuTable actualTable = new SudokuTable(getTestMatrix(matrixSize, matrixValues));
+		actualTable.threadlessContainedAnalysis();
+		
+		for(int y = 1; y <= expectedTable.size; y++)
+		{
+			for(int x = 1; x <= expectedTable.size; x++)
+			{
+				ArrayList<Integer> expectedPossibleValues = expectedTable.get(y, x).getPossibleValues();
+				ArrayList<Integer> actualPossibleValues	= actualTable	.get(y, x).getPossibleValues();
+				Assertions.assertEquals(expectedPossibleValues.size(), actualPossibleValues.size(), String.format("[%d, %d]", y, x));
+				for(int possibleValue : expectedPossibleValues)
+				{
+					if(actualPossibleValues.contains(possibleValue)) continue;
+					Assertions.fail("There is at least one possible value not present in the actual values ("+possibleValue+").");
+				}
+				
+			}
+		}
+		
+	}
+	
+	@Test
+	public void tableAnalysisReturnsValidOutputForSomewhatLessCompleteSudoku()
+	{
+		int matrixSize = 9;
+		String matrixValues = "046300079703006400005000036050001603370564900069823007000063700000007368637018090";
+		
+		SquareSudokuMatrix expectedMatrix = getTestMatrix(matrixSize, matrixValues);
+		expectedMatrix.get(1,1).addPossibleValues(Arrays.asList(1,2,8));
+		expectedMatrix.get(1,5).addPossibleValues(Arrays.asList(5,8));
+		expectedMatrix.get(1,6).addPossibleValues(Arrays.asList(2,5));
+		expectedMatrix.get(1,7).addPossibleValues(Arrays.asList(1,2,5,8));
+		
+		expectedMatrix.get(2,2).addPossibleValues(Arrays.asList(1,2,8,9));
+		expectedMatrix.get(2,4).addPossibleValues(Arrays.asList(1,2,9));
+		expectedMatrix.get(2,5).addPossibleValues(Arrays.asList(5,8,9));
+		expectedMatrix.get(2,8).addPossibleValues(Arrays.asList(1,2,5,8));
+		expectedMatrix.get(2,9).addPossibleValues(Arrays.asList(1,2,5));
+		
+		expectedMatrix.get(3,1).addPossibleValues(Arrays.asList(1,2,8,9));
+		expectedMatrix.get(3,2).addPossibleValues(Arrays.asList(1,2,8,9));
+		expectedMatrix.get(3,4).addPossibleValues(Arrays.asList(1,2,4,7,9));
+		expectedMatrix.get(3,5).addPossibleValues(Arrays.asList(4,7,8,9));
+		expectedMatrix.get(3,6).addPossibleValues(Arrays.asList(2,9));
+		expectedMatrix.get(3,7).addPossibleValues(Arrays.asList(1,2,8));
 
-		subOutput.get(4, 2).addPossibleValues(Arrays.asList(1, 2, 3));
-		subOutput.get(4, 4).addPossibleValues(Arrays.asList(2, 3, 5));
-		subOutput.get(4, 5).addPossibleValues(Arrays.asList(1, 2));
-		subOutput.get(4, 6).addPossibleValues(Arrays.asList(2, 5));
-		subOutput.get(4, 9).addPossibleValues(Arrays.asList(4));
+		expectedMatrix.get(4,1).addPossibleValues(Arrays.asList(2,4,8));
+		expectedMatrix.get(4,3).addPossibleValues(Arrays.asList(2,4,8));
+		expectedMatrix.get(4,4).addPossibleValues(Arrays.asList(7,9));
+		expectedMatrix.get(4,5).addPossibleValues(Arrays.asList(7,9));
+		expectedMatrix.get(4,8).addPossibleValues(Arrays.asList(2,4,8));
+		
+		expectedMatrix.get(5,3).addPossibleValues(Arrays.asList(1,2,8));
+		expectedMatrix.get(5,8).addPossibleValues(Arrays.asList(1,2,8));
+		expectedMatrix.get(5,9).addPossibleValues(Arrays.asList(1,2));
 
-		subOutput.get(5, 1).addPossibleValues(Arrays.asList());
+		expectedMatrix.get(6,1).addPossibleValues(Arrays.asList(1,4));
+		expectedMatrix.get(6,7).addPossibleValues(Arrays.asList(1,5));
+		expectedMatrix.get(6,8).addPossibleValues(Arrays.asList(1,4,5));
+
+		expectedMatrix.get(7,1).addPossibleValues(Arrays.asList(1,2,4,5,8,9));
+		expectedMatrix.get(7,2).addPossibleValues(Arrays.asList(1,2,8,9));
+		expectedMatrix.get(7,3).addPossibleValues(Arrays.asList(1,2,4,8));
+		expectedMatrix.get(7,6).addPossibleValues(Arrays.asList(2,5,9));
+		expectedMatrix.get(7,8).addPossibleValues(Arrays.asList(1,2));
+		expectedMatrix.get(7,9).addPossibleValues(Arrays.asList(1,2,4));
+		
+		expectedMatrix.get(8,1).addPossibleValues(Arrays.asList(1,2,4,5,9));
+		expectedMatrix.get(8,2).addPossibleValues(Arrays.asList(1,2,9));
+		expectedMatrix.get(8,3).addPossibleValues(Arrays.asList(1,2,4));
+		expectedMatrix.get(8,4).addPossibleValues(Arrays.asList(2,4,9));
+		expectedMatrix.get(8,5).addPossibleValues(Arrays.asList(4,5,9));
+
+		expectedMatrix.get(9,4).addPossibleValues(Arrays.asList(2,4));
+		expectedMatrix.get(9,7).addPossibleValues(Arrays.asList(2,5));
+		expectedMatrix.get(9,9).addPossibleValues(Arrays.asList(2,4,5));
+		
+		SudokuTable expectedTable =  new SudokuTable(expectedMatrix);
+		SudokuTable actualTable = new SudokuTable(getTestMatrix(matrixSize, matrixValues));
+		actualTable.threadlessContainedAnalysis();
+		
+		for(int y = 1; y <= expectedTable.size; y++)
+		{
+			for(int x = 1; x <= expectedTable.size; x++)
+			{
+				ArrayList<Integer> expectedPossibleValues = expectedTable.get(y, x).getPossibleValues();
+				ArrayList<Integer> actualPossibleValues	= actualTable	.get(y, x).getPossibleValues();
+				if(expectedPossibleValues.size() != actualPossibleValues.size()) {
+					String additionalOutput = "expected values: {";
+					for(int pv: expectedPossibleValues) additionalOutput+= " "+pv;
+					additionalOutput += " }\nactual values: {";
+					for(int pv: actualPossibleValues) additionalOutput+= " "+pv;
+					additionalOutput += " }";
+					
+					Assertions.fail( 
+						String.format("[%d, %d] -> expected: <%d>, actual: <%d>\n%s", 
+											y, x, 
+											expectedPossibleValues.size(), 
+											actualPossibleValues.size(), 
+											additionalOutput
+						) 
+					);
+				}
+				for(int possibleValue : expectedPossibleValues)
+				{
+					if(actualPossibleValues.contains(possibleValue)) continue;
+					Assertions.fail("There is at least one possible value not present in the actual values ("+possibleValue+").");
+				}
+				
+			}
+		}
 		
 	}
 

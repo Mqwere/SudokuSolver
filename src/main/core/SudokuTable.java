@@ -58,13 +58,14 @@ public class SudokuTable implements Comparable<Object>{
 			(
 				(field) ->
 				{
-					field.addPossibleValues(allPossibleValues);
+					if(field.value == 0)
+						field.addPossibleValues(allPossibleValues);
 				}
 			);
 		
-		for (int y = 0; y < size; y++)
+		for (int y = 1; y <= size; y++)
 		{
-			for(int x = 0; x < size; y++)
+			for(int x = 1; x <= size; x++)
 			{
 				int value;
 				if((value = get(y,x).value) == 0) continue;
@@ -301,6 +302,7 @@ public class SudokuTable implements Comparable<Object>{
 	
 	private void reflectSetInPossibleValues(int row, int col, int val)
 	{
+		
 		getAffectedFieldsCoords(row, col)
 			.stream()
 			.filter( (sf) -> { return get(sf).value == 0; } )
