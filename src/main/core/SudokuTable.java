@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
+import java.util.TreeSet;
 
 import main.threads.SudokuThread;
 
@@ -129,6 +129,7 @@ public class SudokuTable implements Comparable<Object>{
 			e.printStackTrace();
 		}
 	}
+	
 	public SudokuField get(SudokuFieldLite field)
 	{
 		return content.get(field.row, field.col);
@@ -194,7 +195,7 @@ public class SudokuTable implements Comparable<Object>{
 			for(int x = 1; x <= size; x++)
 			{
 				SudokuField field = get(y,x);
-				if(field.numberOfPossibleValues!=0)output += String.format("\n[%d-%d]: %s", y, x, field.toString());
+				if(field.getNumberOfPossibleValues()!=0)output += String.format("\n[%d-%d]: %s", y, x, field.toString());
 			}
 		}
 		output+= "\n========================================";
@@ -249,6 +250,11 @@ public class SudokuTable implements Comparable<Object>{
 			}
 		}
 		return true;
+	}
+	
+	public void testRevertSettingOfCell(int row, int col)
+	{
+		this.revertChangeCreatedByProgressionNode(new SudokuFieldLite( row, col, get(row, col).value ) );
 	}
 
 	private void set(int row, int col, int val)
@@ -311,10 +317,20 @@ public class SudokuTable implements Comparable<Object>{
 
 	private void reflectRevertInPossibleValues(int row, int col, int val)
 	{
+		TreeSet<Integer> revertedFieldPossibleValues = new TreeSet<>();
+		for(int i = 1; i <= this.size; i++) revertedFieldPossibleValues.add(i);
 		getAffectedFieldsCoords(row, col)
 			.stream()
-			.filter( (sf) -> { return get(sf).value == 0 && isValidMove(sf, val); } )
-			.forEach( (sf) -> { get(sf).addPossibleValue(val); } );
+			.forEach( (sf) -> 
+				{ 
+					if(get(sf).value != 0)
+						revertedFieldPossibleValues.remove(get(sf).value);
+					else if (isValidMove(sf, val))
+						get(sf).addPossibleValue(val); 
+				} 
+			);
+		
+		get(row, col).setPossibleValues(revertedFieldPossibleValues);
 	}
 
 	private boolean foundAndAppliedObviousMoves()
@@ -325,7 +341,7 @@ public class SudokuTable implements Comparable<Object>{
 			for(int x = 1; x <= size; x++)
 			{
 				SudokuField field;
-				if((field = get(y,x)).numberOfPossibleValues == 1)
+				if((field = get(y,x)).getNumberOfPossibleValues() == 1)
 				{
 					ArrayList<Integer> possibleValues = field.getPossibleValues();
 					int chosenValue = possibleValues.get(0);
@@ -359,9 +375,9 @@ public class SudokuTable implements Comparable<Object>{
 		{
 			for(x = 1; x <= size; x++)
 			{
-				if((field = get(y,x)).numberOfPossibleValues !=0 && (field.numberOfPossibleValues < minPosNr || minPosNr == 0))
+				if((field = get(y,x)).getNumberOfPossibleValues() !=0 && (field.getNumberOfPossibleValues() < minPosNr || minPosNr == 0))
 				{
-					minPosNr 	= field.numberOfPossibleValues;
+					minPosNr 	= field.getNumberOfPossibleValues();
 					minPosY		= y;
 					minPosX		= x;
 					foundOne	= true;
@@ -405,10 +421,10 @@ public class SudokuTable implements Comparable<Object>{
 		return foundOne;
 	}
 	
-	private void foreachElement(Consumer<? super SudokuField> action)
-	{
-		this.content.forEachElement(action);
-	}
+//	private void foreachElement(Consumer<? super SudokuField> action)
+//	{
+//		this.content.forEachElement(action);
+//	}
 
 	private void printFinishedAnalysisMessage()
 	{
@@ -417,29 +433,6 @@ public class SudokuTable implements Comparable<Object>{
 
 		if(SudokuSolver.referenceWindow) SudokuSolver.window.notifyAboutFinalization();
 		SudokuSolver.println("The result table has %s the validation.", validate() ? "passed":"failed");
-	}
-	
-	private void printPossibleValuesForDebugPurposes()
-	{
-		int y, x;
-		SudokuField field;
-		
-		String output = "";
-		
-		for(y = 1; y <= size; y++)
-		{
-			for(x = 1; x <= size; x++)
-			{
-				if((field = get(y,x)).numberOfPossibleValues !=0)
-				{
-					output += "["+y+", "+x+"] -> {";
-					for(int value: field.getPossibleValues())
-						output += " " + value;
-					output += " }\n";
-				}
-			}
-		}
-		SudokuSolver.print(output);
 	}
 	
 	private boolean thereIsAtLeastOneUndefinedValue()

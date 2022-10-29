@@ -146,6 +146,7 @@ public class SudokuTableTest
 						) 
 					);
 				}
+				
 				for(int possibleValue : expectedPossibleValues)
 				{
 					if(actualPossibleValues.contains(possibleValue)) continue;
@@ -157,4 +158,56 @@ public class SudokuTableTest
 		
 	}
 
+//	testRevertSettingOfCell
+
+	@Test
+	public void tableAnalysisIsAbleToCorrectlyRevertMove()
+	{
+		int matrixSize = 9;
+		String actualMatrixValues = "046300079703006400005000036050001603370564900069823007000063700000007368637018090";
+		
+		SquareSudokuMatrix actualMatrix = getTestMatrix(matrixSize, actualMatrixValues);
+
+		SudokuTable actualTable = new SudokuTable(actualMatrix);
+		actualTable.threadlessContainedAnalysis();
+		actualTable.testRevertSettingOfCell(1, 2);
+		
+		String expectedMatrixValues = "006300079703006400005000036050001603370564900069823007000063700000007368637018090";
+		
+		SquareSudokuMatrix expectedMatrix = getTestMatrix(matrixSize, expectedMatrixValues);
+		
+		SudokuTable expectedTable = new SudokuTable(expectedMatrix);
+		expectedTable.threadlessContainedAnalysis();
+		
+		for(int y = 1; y <= expectedTable.size; y++)
+		{
+			for(int x = 1; x <= expectedTable.size; x++)
+			{
+				ArrayList<Integer> expectedPossibleValues = expectedTable.get(y, x).getPossibleValues();
+				ArrayList<Integer> actualPossibleValues	= actualTable	.get(y, x).getPossibleValues();
+				if(expectedPossibleValues.size() != actualPossibleValues.size()) {
+					String additionalOutput = "expected values: {";
+					for(int pv: expectedPossibleValues) additionalOutput+= " "+pv;
+					additionalOutput += " }\nactual values: {";
+					for(int pv: actualPossibleValues) additionalOutput+= " "+pv;
+					additionalOutput += " }";
+					
+					Assertions.fail( 
+						String.format("[%d, %d] -> expected: <%d>, actual: <%d>\n%s", 
+											y, x, 
+											expectedPossibleValues.size(), 
+											actualPossibleValues.size(), 
+											additionalOutput
+						) 
+					);
+				}
+				for(int possibleValue : expectedPossibleValues)
+				{
+					if(actualPossibleValues.contains(possibleValue)) continue;
+					Assertions.fail("There is at least one possible value not present in the actual values ("+possibleValue+").");
+				}
+				
+			}
+		}
+	}
 }

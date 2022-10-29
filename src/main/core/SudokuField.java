@@ -1,11 +1,12 @@
 package main.core;
 
+import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
 public class SudokuField {
-	public int value, numberOfPossibleValues = 0;
+	public int value;
 	private ArrayList<Integer> possibleValues = new ArrayList<>();
 	
 	public SudokuField(int value)
@@ -15,14 +16,12 @@ public class SudokuField {
 	
 	public void addPossibleValue(int value) 
 	{ 
-		this.possibleValues.add(value); 
-		numberOfPossibleValues++; 
+		this.possibleValues.add(value);
 	}
 	
 	public void addPossibleValues(Collection<Integer> values) 
 	{ 
 		this.possibleValues.addAll(values);
-		numberOfPossibleValues += values.size(); 
 	}
 	
 	public void removePossibleValue(int value)
@@ -42,12 +41,12 @@ public class SudokuField {
 					)
 					.collect(Collectors.toList())
 			);
-			
-			numberOfPossibleValues--; 
 		}
 	}
 	
 	public ArrayList<Integer> getPossibleValues() { return this.possibleValues; }
+	
+	public int getNumberOfPossibleValues() { return this.possibleValues.size(); }
 	
 	@Override
 	public boolean equals(Object o)
@@ -69,5 +68,12 @@ public class SudokuField {
 		String posVals = " ";
 		for(int val:possibleValues) posVals += val+" ";
 		return  String.format("[%d] PV(%s)", value, posVals);
+	}
+
+	public void setPossibleValues(AbstractCollection<Integer> possibleValues)
+	{
+		this.possibleValues = new ArrayList<>();
+		for(int val: possibleValues)
+			this.possibleValues.add(val);
 	}
 }
